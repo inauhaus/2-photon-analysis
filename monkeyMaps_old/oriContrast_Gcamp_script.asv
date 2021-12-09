@@ -1,0 +1,58 @@
+pRev
+
+global G_RChandles G_handles
+
+set(G_RChandles.kernelLength,'string','[-500 2000]');
+set(G_RChandles.LPflag,'value',0);
+set(G_RChandles.HPflag,'value',1);
+set(G_RChandles.LPWind,'value',1);
+set(G_RChandles.HPWind,'value',1);
+set(G_RChandles.Lwidth,'string',50);
+set(G_RChandles.Hwidth,'string',5000);
+set(G_RChandles.blankNorm,'value',0);
+
+%set(G_handles.datadir,'string','C:\2p_data\')
+%set(G_handles.analyzedir,'string','C:\2p_data\AnalyzerFiles\')
+
+set(G_handles.datadir,'string','e:\2p_data\')
+set(G_handles.analyzedir,'string','e:\2p_data\AnalyzerFiles\')
+
+%%  
+clear BWall oprefAll
+
+oddflag = 1;
+getAllorisfinfo_mouseGcamp
+
+oddflag = 0;
+getAllorisfinfo_mouseGcamp
+
+
+%%
+BW = BWall;
+opref = oprefAll;
+
+id = find(isnan(sum(BW,2)));
+BW(id,:) = [];
+opref(id,:) = [];
+
+dpref = abs(angle(exp(1i*opref(:,1)*pi/180*2).*exp(-1i*opref(:,2)*pi/180*2)))/2*180/pi;
+id = find(dpref > 200);
+BW(id,:) = [];
+
+figure, 
+subplot(1,2,1), scatter(BW(:,1),BW(:,2),'.k'), hold on, plot([0 40],[0 40])
+xlabel('low contrast'), ylabel('high contrast') 
+
+subplot(1,2,2)
+hdom = [-.7:.1:.7];
+Y = BW(:,2)./BW(:,1);
+[mu sig] = getGeoStats(Y); mu = round(mu*100)/100; sig = round(sig*100)/100;
+h = hist(log10(Y),hdom);
+bar(hdom,h)
+xlabel('HalfWidth (high cont)/HalfWidth (low cont)')
+xlim([hdom(1) hdom(end)])
+[h p] = ttest(log10(Y));
+title(['geomean/sig = ' num2str(mu) '/' num2str(sig) '  p = ' num2str(p)])
+h = findobj(gca,'Type','patch');
+set(h,'FaceColor',[.5 .5 .5])
+

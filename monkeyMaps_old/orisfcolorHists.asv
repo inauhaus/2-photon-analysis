@@ -1,0 +1,18 @@
+
+figure, 
+
+id = find(~isnan(LMphaseDiff{1}));
+subplot(2,1,1)
+plotBarGraph(LMphaseDiff{1}(id),0,[0:15:180])
+set(gca,'Xtick',[0 90 180])
+xlim([-10 190])
+xlabel('ori preference (deg)')
+axis square
+
+id = find(~isnan(lumpref{1}));
+subplot(2,1,2)
+plotBarGraph(lumpref{1}(id),1,[-.5:.05:.5])
+set(gca,'Xtick',[-.5 0 .5])
+xlim([-.5 .5])
+xlabel('L/M')
+axis square

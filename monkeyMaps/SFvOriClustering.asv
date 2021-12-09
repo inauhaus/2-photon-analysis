@@ -1,0 +1,62 @@
+function SFvOriClustering(PW_ro)
+
+%%
+try
+    Dist = PW_ro.Dist{1};
+    dori = abs(PW_ro.dori{1});
+    dsf = abs(PW_ro.dsf{1});
+    dsfpair = PW_ro.dsfpair{1};
+    doripair = PW_ro.doripair{1};
+catch
+    Dist = PW_ro.Dist;
+    dori = abs(PW_ro.dori);
+    dsf = abs(PW_ro.dsf);
+    dsfpair = PW_ro.dsfpair;
+    doripair = PW_ro.doripair;
+end
+    
+
+%dsf = abs(log2(PW_ro.dsfpair{1}(:,1)./PW_ro.dsfpair{1}(:,2)));
+
+Dbins = 0:50:800;
+%Dbins = 0:20:100;
+clear Distdom dorimu dorisig dsfmu dsfsig SFr SFp ORIr
+for i = 1:length(Dbins)-1
+    
+   id = find(Dist>Dbins(i) & Dist<Dbins(i+1) & ~isnan(dori) & ~isnan(dsf));
+   Distdom(i) = mean(Dist(id));
+   dorimu(i) = mean(dori(id));
+   dorisig(i) = std(dori(id))/sqrt(length(id));
+   
+   dsfmu(i) = mean(dsf(id));
+   dsfsig(i) = std(dsf(id))/sqrt(length(id));
+   
+   [r p] = corrcoef(log2(dsfpair(id,1)),log2(dsfpair(id,2)));
+   SFr(i) = r(1,2);
+   SFp(i) = p(1,2);
+   
+   [r] = circCorr(doripair(id,1)*pi/90,doripair(id,2)*pi/90);
+   ORIr(i) = r;
+   %ORIp(i) = p(1,2);
+   
+   [r p] = corrcoef(dori(id),dsf(id));
+   OrivSFr(i) = r(1,2);
+   OrivSFp(i) = p(1,2);
+end
+
+
+figure,
+subplot(3,1,1)
+plot(Distdom,SFr),  ylabel('sf1 sf2 correlation')
+subplot(3,1,2)
+plot(Distdom,ORIr), ylabel('ori1 ori2 correlation')
+subplot(3,1,3)
+plot(Distdom,OrivSFr), ylabel('|dori| vs. |dsf| correlation')
+xlabel('distance (mm)')
+
+figure,plot(Dist,dori,'.k')
+hold on, errorbar(Distdom,dorimu,dorisig)
+hold on, plot(Distdom,ones(size))
+
+figure,plot(Dist,dsf,'.k')
+hold on, errorbar(Distdom,dsfmu,dsfsig)

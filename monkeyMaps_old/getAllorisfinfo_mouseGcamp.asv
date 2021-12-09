@@ -1,0 +1,155 @@
+global G_RChandles G_handles PW NB TC
+
+%% ab2; u000_014  
+
+%Initialize structures with the first animal
+
+clear dori dsf doriEuc dorisf ax dist doripair dsfpair dtcoripair dtcsfpair animID
+
+global maskS cellS
+
+anim = 'zc1';
+expt = 'u000_025';
+
+%load expt
+set(G_handles.loadana,'string',anim)
+set(G_handles.loadexp,'string',expt)
+Gsetdirectories
+
+maskroot = 'C:\2ph_code\Beta\Masks\mouse\';
+maskpath = [maskroot anim '_' expt];
+traceroot = 'C:\2ph_code\Beta\cellTraces\mouse\';
+tracepath = [traceroot anim '_' expt '_cellS'];
+
+load(maskpath,'maskS') 
+load(tracepath,'cellS') 
+
+if oddflag
+    set(G_RChandles.dropTrials,'string','[2:2:getnotrials]')
+else
+    set(G_RChandles.dropTrials,'string','[1:2:getnotrials]')
+end
+
+hh = makeTemporalfilter;
+trialdom = 1:1:getnotrials;
+eval(['dT = ' get(G_RChandles.dropTrials,'string')])
+trialdom(dT) = [];
+Ggetrevcorrkernel2(cellS.cellMat,trialdom,hh);
+
+Gkernelplots5
+
+%Initialize single-cell info
+fnames = fieldnames(TC);
+for i = 1:length(fnames)
+    dum = eval(['TC.' fnames{i} '{1};']); dim = size(dum); 
+    if min(dim) == 1
+        eval([fnames{i} '= dum(:);']);
+    else
+        eval([fnames{i} '= dum;']);
+    end
+end
+animID = ones(1,length(TC.opref{1}));  %for bootstrap later
+
+close all
+%% Get the rest of them
+
+global maskS cellS
+
+clear animS exptS
+%animS{1} = 'zc1'; 
+animS{2} = 'zc1';
+animS{3} = 'zc0';
+animS{4} = 'zc0';
+animS{5} = 'zb9'; 
+animS{5} = 'zb9'; 
+animS{6} = 'zb8'; 
+animS{7} = 'zb8'; 
+animS{8} = 'zb6'; 
+animS{9} = 'zb6'; 
+animS{10} = 'zb5'; 
+
+%animS{8} = 'zb7'; 
+%animS{6} = 'zb5'; 
+
+%exptS{1} = 'u000_025'; 
+exptS{2} = 'u000_042'; 
+exptS{3} = 'u000_018';
+exptS{4} = 'u000_030';
+exptS{5} = 'u000_009';
+exptS{5} = 'u000_009';
+exptS{6} = 'u000_007';
+exptS{7} = 'u000_021';
+exptS{8} = 'u000_016';
+exptS{9} = 'u000_027';
+exptS{10} = 'u000_030'; 
+
+%exptS{8} = 'u000_029';
+%exptS{6} = 'u000_021';
+
+
+
+
+for ex = 2:9
+
+    anim = animS{ex};
+    expt = exptS{ex};
+
+    %load expt
+    set(G_handles.loadana,'string',anim)
+    set(G_handles.loadexp,'string',expt)
+    Gsetdirectories
+
+    maskroot = 'C:\2ph_code\Beta\Masks\mouse\';
+    maskpath = [maskroot anim '_' expt];
+    traceroot = 'C:\2ph_code\Beta\cellTraces\mouse\';
+    tracepath = [traceroot anim '_' expt '_cellS'];
+
+    load(maskpath,'maskS')
+    load(tracepath,'cellS')
+    
+    if oddflag
+        set(G_RChandles.dropTrials,'string','[2:2:getnotrials]')
+        if strcmp('u000_016',expt) & strcmp('zb8',anim)
+            set(G_RChandles.dropTrials,'string','[2:2:70 71:80]')
+        end
+    else
+        set(G_RChandles.dropTrials,'string','[1:2:getnotrials]')
+        if strcmp('u000_016',expt) & strcmp('zb8',anim)
+            set(G_RChandles.dropTrials,'string','[1:2:70 71:80]')
+        end
+    end
+
+    hh = makeTemporalfilter;
+    trialdom = 1:1:getnotrials;
+    eval(['dT = ' get(G_RChandles.dropTrials,'string')])
+    trialdom(dT) = [];
+    Ggetrevcorrkernel2(cellS.cellMat,trialdom,hh);
+    
+    [maporidiff(ex) mapslopemag(ex)] = Gkernelplots5
+    close all
+    
+    %Accumulate single cell info
+    fnames = fieldnames(TC);
+    for i = 1:length(fnames)
+        dum = eval(['TC.' fnames{i} '{1};']); dim = size(dum);
+        if min(dim) == 1
+            eval([fnames{i} '= [' fnames{i} '; dum(:)];']);
+        else
+            eval([fnames{i} '= [' fnames{i} '; dum];']);
+        end
+    end
+    
+    animID = [animID ex*ones(1,length(TC.opref{1}))];  %for bootstrap later
+    
+end
+
+
+%%
+
+if oddflag
+    BWall(:,1) = orisig;
+    oprefAll(:,1) = opref;
+else
+    BWall(:,2) = orisig;
+    oprefAll(:,2) = opref;
+end

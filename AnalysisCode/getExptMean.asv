@@ -1,0 +1,37 @@
+function [CHs] = getExptMean(chvec,Ntrials)
+
+nc = pepgetnoconditions;
+pepsetrepeat(0);
+
+N = 0;
+
+CHs{1} = 0; CHs{2} = 0;
+for trial = 1:Ntrials
+    
+    
+    pepsetcondition(c);
+    
+    if ~pepblank
+
+        nr = pepgetnorepeats;
+
+        for r = 0:nr-1
+            pepsetrepeat(r)
+
+            CHdum = GetTrialData(chvec);
+
+            if chvec(1)
+                CHs{1} = sum(CHdum{1}(:,:,2:end-3),3) + CHs{1};
+            end
+            if chvec(2)
+                CHs{2} = sum(CHdum{2}(:,:,2:end-3),3) + CHs{2};
+            end
+
+            N = N + length(CHs{1}(1,1,:));
+        end
+    end
+    
+end
+
+CHs{1} = CHs{1}/N;
+CHs{2} = CHs{2}/N;

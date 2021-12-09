@@ -1,0 +1,66 @@
+function [BWpop CVpop gainPop fhi2 flo2 baseSlope Eid] = getdriftStats(kernPop,kernSigPop,blank,blankSig)
+
+
+global cellS Analyzer
+
+matDim = size(kernPop);
+
+Nsym = length(Analyzer.loops.conds{1}.symbol);
+
+oridom = getdomain('ori');
+sfdom = getdomain('sf_freq');
+
+for i = 1:Nsym
+    sym = Analyzer.loops.conds{1}.symbol{i};
+    switch sym
+        case 'ori'
+            oriID = i;
+        case 's_freq'
+            sfID = i;
+    end        
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Make smoothing functions (used to find maxima)
+
+%Smoother before taking ori curve
+orismoother = getSmoother([.2 1 .2],[.5 1 .5],oridom,sfdom);
+
+%Smoother before taking sf curve
+sfsmoother = getSmoother([.5 1 .5],[.4 1 .4],oridom,sfdom);
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+Ncell = matDim(end);
+
+for p = 1:length(Ncell)
+    
+    %getsfcurves
+    kerndum = ifft2(kernPop(:,:,p).*sfsmoother)
+    
+    
+end
+
+
+
+
+
+function smoother = getSmoother(kori,ksf,oridom,sfdom)
+
+if length(sfdom) == 1
+    ksf = 1;
+end
+if length(oridom) == 1
+    kori = 1;
+end
+
+ksf = [ksf zeros(1,length(sfdom)-length(ksf))];
+kori = [kori zeros(1,length(oridom)-length(kori))];
+smoother = kori'*ksf;
+smoother = smoother/sum(smoother(:));

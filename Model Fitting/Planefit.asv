@@ -1,0 +1,54 @@
+function [param ffit varacc] = Planefit(domx,domy,f,varargin)
+
+%This fits a plane to a circular variable in the axis domain
+
+global RF xpts ypts
+
+RF = f; xpts = domx; ypts = domy;
+
+%% make the guess
+if isempty(varargin)
+    angpref = angle(sum(exp(1i*f*2*pi/180)));
+    angpref = angpref + pi*(1-sign(angpref+eps));  %0 to 2pi
+    angpref = angpref*90/pi;               %0 to 180
+    
+    fdum = angle(exp(1i*(f-angpref)*2*pi/180))*90/pi;
+    
+    id = find(fdum(:)<0);
+    fdum(id) = fdum(id)+360;
+    fdum = fdum/2;
+    
+    xslopeguess = std(fdum(:))/std(xpts);
+    yslopeguess = std(fdum(:))/std(ypts);
+    baseguess = mean(f(:));
+else
+    xslopeguess = varargin{1}(1);
+    yslopeguess = varargin{1}(2);
+    baseguess = varargin{1}(3);
+end
+
+x0 = [xslopeguess yslopeguess baseguess];
+
+
+%% search
+options = optimset('MaxFunEvals',6000,'MaxIter',60000,'TolFun',.000004,'TolX',.000004);
+[param,f] = fminsearch('planefitter_handle',x0,options);
+
+%[param,f] = fminsearch('planefitter_handle',x0);
+
+%f = angle(exp(1i*f*pi/180))*180/pi;
+
+
+
+%%%%%%%%%%%
+%%
+
+ffit = param(1)*domx + param(2)*domy + param(3);
+
+ffit = angle(exp(1i*ffit*pi/180))*180/pi; %wrap it
+id = find(ffit(:)<0);
+ffit(id) = ffit(id)+360;
+ffit = ffit/2;
+
+varacc = (var(f(:))-var(f(:)-ffit(:)))/var(f(:));
+

@@ -1,0 +1,23 @@
+function imShuff = phaseShuff(im) 
+
+imMag = abs(fft2(im));
+imAng = angle(fft2(im));
+
+[M N] = size(im);
+
+Q1 = imAng(1:M/2,(N/2+1):end);
+Q2 = imAng(1:M/2,1:N/2);
+
+[qM qN] = size(Q1);
+
+dum = rand(1,qM*qN);
+[dum idsort] = sort(dum);
+Q1 = reshape(Q1,qM,qN);
+Q2 = reshape(Q2,qM,qN);
+
+Q3 = -fliplr(flipud(Q1));
+Q4 = -fliplr(flipud(Q2));
+
+imAng = [[Q2 Q1]; [Q3 Q4]];
+
+imShuff = ifft2(imMag.*exp(1i*imAng));

@@ -1,0 +1,312 @@
+global bw f0m f0m_var funcmap ACQinfo symbolInfo Analyzer G_handles idExamp
+
+set(G_handles.datadir,'string','e:\2p_data\')
+set(G_handles.analyzedir,'string','e:\2p_data\AnalyzerFiles\')
+
+%set(G_handles.datadir,'string','C:\2p_data\')
+%set(G_handles.analyzedir,'string','C:\2p_data\AnalyzerFiles\')
+
+%%%%%%%First, left hemisphere%%%%%%%%%%%
+
+idExamp = [100 217; 211 92; 156 140; 138 191];  %left hemi
+
+%make sure to hit "Set Directory" in GUI
+
+%% ab8; u000_097   (~190um deep; shallowest) 
+
+anim = 'ab8';
+expt = 'u000_097';
+
+%load expt
+set(G_handles.loadana,'string',anim)
+set(G_handles.loadexp,'string',expt)
+Gsetdirectories
+
+load(['C:\2ph_code\Beta\f0images\f0_' anim '_' expt(2:end)])
+
+dthresh = 4;
+[oriang{1} orimag{1} sfpref{1} sfmag{1} dpmask{1}] = OriSf_WideField(dthresh);
+
+set(G_handles.Lwidth,'string','.1');
+hh = makeMapFilter;
+plotMapExamples(hh)
+
+%% ab8; u000_093   (~250um deep; middle) 
+
+anim = 'ab8';
+expt = 'u000_093';
+
+%load expt
+set(G_handles.loadana,'string',anim)
+set(G_handles.loadexp,'string',expt)
+Gsetdirectories
+
+load(['C:\2ph_code\Beta\f0images\f0_' anim '_' expt(2:end)])
+
+dthresh = 1.5;
+[oriang{2} orimag{2} sfpref{2} sfmag{2} dpmask{2}] = OriSf_WideField(dthresh);
+
+set(G_handles.Lwidth,'string','.1');
+hh = makeMapFilter;
+plotMapExamples(hh) 
+
+%% ab8; u000_095   (~310um deep; deepest) 
+
+anim = 'ab8';
+expt = 'u000_095';
+
+%load expt
+set(G_handles.loadana,'string',anim)
+set(G_handles.loadexp,'string',expt)
+Gsetdirectories
+
+load(['C:\2ph_code\Beta\f0images\f0_' anim '_' expt(2:end)])
+
+dthresh = 4;
+[oriang{3} orimag{3} sfpref{3} sfmag{3} dpmask{3}] = OriSf_WideField(dthresh);
+
+set(G_handles.Lwidth,'string','.5');
+hh = makeMapFilter;
+plotMapExamples(hh)
+
+%% Compute depth continuity
+
+d1 = 1; d2 = 3;
+
+idROI = find( dpmask{d1}.*dpmask{d2} == 1 );
+
+[oriCont_mu oriCont_sig sfCont_mu sfCont_sig] = depthContinuity(oriang,sfpref,dpmask,[d1 d2])
+
+[rori] = circCorr(oriang{d1}(idROI),oriang{d2}(idROI), 180)
+[rsf p] = corrcoef(log2(sfpref{d1}(idROI)),log2(sfpref{d2}(idROI)))
+
+%%%%%%%Now right hemisphere%%%%%%%%%%%
+
+
+%% ab8; u001_008   (~180um deep; shallower) 
+idExamp = [183 167; 223 117; 220 139; 235 132];  %right hemi
+clear Tens Tens_var %I didn't save these because they are too big with faster scanning
+
+anim = 'ab8';
+expt = 'u001_008';
+
+%load expt
+set(G_handles.loadana,'string',anim)
+set(G_handles.loadexp,'string',expt)
+Gsetdirectories
+
+load(['C:\2ph_code\Beta\f0images\f0_' anim '_' expt(2:end)])
+
+dthresh = 3;
+[oriang{1} orimag{1} sfpref{1} sfmag{1} dpmask{1}] = OriSf_WideField(dthresh);
+
+set(G_handles.Lwidth,'string','.5');
+hh = makeMapFilter;
+plotMapExamples(hh)
+
+%% ab8; u001_007   (~230um deep; middle) 
+
+anim = 'ab8';
+expt = 'u001_007';
+
+%load expt
+set(G_handles.loadana,'string',anim)
+set(G_handles.loadexp,'string',expt)
+Gsetdirectories
+
+load(['C:\2ph_code\Beta\f0images\f0_' anim '_' expt(2:end)])
+
+dthresh = 1;
+[oriang{2} orimag{2} sfpref{2} sfmag{2} dpmask{2}] = OriSf_WideField(dthresh);
+plotMapExamples(hh)
+
+%% ab8; u001_009   (~280um deep; deepest) 
+
+anim = 'ab8';
+expt = 'u001_009';
+
+%load expt
+set(G_handles.loadana,'string',anim)
+set(G_handles.loadexp,'string',expt)
+Gsetdirectories
+
+load(['C:\2ph_code\Beta\f0images\f0_' anim '_' expt(2:end)])
+
+dthresh = 3.5;
+[oriang{3} orimag{3} sfpref{3} sfmag{3} dpmask{3}] = OriSf_WideField(dthresh);
+
+set(G_handles.Lwidth,'string','.5');
+hh = makeMapFilter;
+plotMapExamples(hh)
+
+%% Compute depth continuity
+
+d1 = 1; d2 = 3;
+idROI = find(bw);
+
+[oriCont_mu oriCont_sig sfCont_mu sfCont_sig] = depthContinuity(oriang,sfpref,dpmask,[d1 d2])
+
+[rori] = circCorr(oriang{d1}(idROI),oriang{d2}(idROI), 180)
+[rsf p] = corrcoef(log2(sfpref{d1}(idROI)),log2(sfpref{d2}(idROI)))
+
+%%%%%%%%%%%%%Other animals%%%%%%%%%%%%%%
+
+
+%% ab9; u000_084 (bigger spot, thats decent)
+
+anim = 'ab9';
+expt = 'u000_084';
+
+%load expt
+set(G_handles.loadana,'string',anim)
+set(G_handles.loadexp,'string',expt)
+Gsetdirectories
+
+load(['C:\2ph_code\Beta\f0images\f0_' anim '_' expt(2:end)]) %N.B.  A trial from experiment 80 (aborted) was averaged in with f0m and f0m_var.
+
+dthresh = 1.5;
+OriSf_WideField(dthresh);
+
+set(G_handles.Lwidth,'string','.5');
+hh = makeMapFilter;
+plotMapExamples(hh)
+%% ab9; u000_059 (a nice patch)
+
+anim = 'ab9';
+expt = 'u000_059';
+
+%load expt
+set(G_handles.loadana,'string',anim)
+set(G_handles.loadexp,'string',expt)
+Gsetdirectories
+
+load(['C:\2ph_code\Beta\f0images\f0_' anim '_' expt(2:end)]) 
+
+dthresh = 2;
+OriSf_WideField(dthresh);
+
+set(G_handles.Lwidth,'string','.5');
+hh = makeMapFilter;
+plotMapExamples(hh)
+
+%% ac0; u000_047  (ok)
+
+anim = 'ac0';
+expt = 'u000_047';
+
+%load expt
+set(G_handles.loadana,'string',anim)
+set(G_handles.loadexp,'string',expt)
+Gsetdirectories
+
+load(['C:\2ph_code\Beta\f0images\f0_' anim '_' expt(2:end)])
+
+dthresh = 1.5;
+OriSf_WideField(dthresh);
+
+set(G_handles.Lwidth,'string','.5');
+hh = makeMapFilter;
+plotMapExamples(hh)
+
+%% ac0; u000_062 (this one is pretty crappy)
+
+anim = 'ac0';
+expt = 'u000_062';
+
+%load expt
+set(G_handles.loadana,'string',anim)
+set(G_handles.loadexp,'string',expt)
+Gsetdirectories
+
+load(['C:\2ph_code\Beta\f0images\f0_' anim '_' expt(2:end)])
+
+dthresh = 3;
+OriSf_WideField(dthresh);
+
+set(G_handles.Lwidth,'string','.5');
+hh = makeMapFilter;
+plotMapExamples(hh)
+
+%% Test if pinwheels are biased to Low/high SF
+
+global sfdist SFatPinwheel
+
+SFPinAll = [];
+sfdistAll = [];
+for i = 1:length(SFatPinwheel)   %loop each ROI
+    SFPinAll = [SFPinAll; SFatPinwheel{i}(:)];    
+    sfdistAll = [sfdistAll; sfdist{i}(:)];
+end
+
+hdom = logspace(log10(.5),log10(8),30);
+h1 = hist(SFPinAll,hdom);
+h2 = hist(sfdistAll,hdom);
+
+figure,
+subplot(2,1,1), bar(h1), ylabel('no of pinwheels')
+subplot(2,1,2), bar(h2/sum(h2)), xlabel('percentage of pixels')
+
+[h p]= ttest2(log2(SFPinAll),log2(sfdistAll))
+
+%% Joint distribution of ORI and SF
+
+global sfdist oridist
+
+sfdistAll = [];
+oridistAll = [];
+for i = 1:length(sfdist)
+    sfdistAll = [sfdistAll; sfdist{i}(:)];
+    oridistAll = [oridistAll; oridist{i}(:)];
+end
+    
+%figure, scatter(oridistAll,log2(sfdistAll),'.k')
+
+[mat xdom ydom] = smoothscatter(oridistAll,log2(sfdistAll),1,.1,[0 180], [-1 3]);
+mat = mat/sum(mat(:));
+%%
+figure, imagesc(xdom,ydom,(mat)), axis xy
+xlabel('ori'), ylabel('sf'),
+colormap gray
+hold on
+
+odom = 0:45:180; do = odom(2)-odom(1);
+clear prc50 prc25 prc75
+for i = 1:length(odom)
+    o1 = odom(i)-do/2; o2 = odom(i)+do/2;
+    
+    if o1>0 & o2<180
+        id2 = find(oridistAll<o2 & oridistAll>o1);
+    end
+    
+    if o1<0
+        o1 = o1+180;
+        id2 = find(oridistAll<o2 | oridistAll>o1);
+    end
+    if o2>180
+        o2 = o2-180;
+        id2 = find(oridistAll<o2 | oridistAll>o1);
+    end       
+    
+    sfdistBin{i} = log2(sfdistAll(id2));
+    
+
+    %prc50(i) = mean(sfpref_oct(id(id2)));
+    prc50(i) = prctile(sfdistBin{i},50);
+    prc25(i) = prctile(sfdistBin{i},25);
+    prc75(i) = prctile(sfdistBin{i},75);    
+    prc10(i) = prctile(sfdistBin{i},10);  
+    prc90(i) = prctile(sfdistBin{i},90); 
+end
+
+plot(odom,prc50,'o-b')
+plot(odom,prc25,'o--b')
+plot(odom,prc75,'o--b')
+plot(odom,prc10,'o--b')
+plot(odom,prc90,'o--b')
+
+h = zeros(length(odom)-1,length(odom)-1)*NaN; p = zeros(length(odom)-1,length(odom)-1)*NaN;
+for i = 1:length(odom)-1
+    for j = i+1:length(odom)-1
+        [h(i,j) p(i,j)] = ttest2(oridist{i},sfdistBin{j});
+    end
+end
